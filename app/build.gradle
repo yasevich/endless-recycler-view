@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "yasevich.endlessrecyclerview.sample"
+        applicationId "com.github.yasevich.endlessrecyclerview.sample"
         minSdkVersion 7
         targetSdkVersion 22
         versionCode 1

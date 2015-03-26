@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'bintray-release'
 
 android {
     compileSdkVersion 22
@@ -14,4 +15,14 @@ android {
 
 dependencies {
     compile 'com.android.support:recyclerview-v7:22.0.0'
+}
+
+publish {
+    userOrg = 'slava'
+    groupId = 'com.github.yasevich'
+    artifactId = 'endless-recycler-view'
+    version = '1.0'
+    website = 'https://github.com/yasevich/endless-recycler-view'
+    issueTracker = "${website}/issues"
+    repository = "${website}.git"
 }

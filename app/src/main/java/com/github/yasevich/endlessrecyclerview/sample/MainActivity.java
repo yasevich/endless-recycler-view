@@ -1,4 +1,4 @@
-package yasevich.endlessrecyclerview.sample;
+package com.github.yasevich.endlessrecyclerview.sample;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import yasevich.endlessrecyclerview.EndlessRecyclerView;
+import com.github.yasevich.endlessrecyclerview.EndlessRecyclerView;
 
 /**
  * @author Slava Yasevich
