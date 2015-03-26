@@ -12,6 +12,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * {@code EndlessRecyclerView} lets you to load new pages when a user scrolls down to the bottom of
+ * a list. If no {@link Pager} provided {@code EndlessRecyclerView} behaves as {@link RecyclerView}.
+ * <p>
+ * {@code EndlessRecyclerView} supports only {@link LinearLayoutManager} and its subclasses.
+ * <p>
+ * Implement {@link Pager} interface to determine when {@code EndlessRecyclerView} should start
+ * loading process and a way to perform async operation. Use {@link #setPager(Pager)} method to set
+ * or reset current pager. When async operation complete you may want to call
+ * {@link #setRefreshing(boolean)} method to hide progress view if it was provided.
+ * <p>
+ * By default {@code EndlessRecyclerView} starts loading operation when you are at the very bottom
+ * of a list but you can opt this behaviour using {@link #setThreshold(int)} method.
+ * <p>
+ * If you want to show progress on the bottom of a list you may set a progress view using
+ * {@link #setProgressView(int)} or {@link #setProgressView(View)} methods.
+ * <p>
+ * If you need to set {@link RecyclerView.OnScrollListener} with this view you must use
+ * {@link #addOnScrollListener(OnScrollListener)} and
+ * {@link #removeOnScrollListener(OnScrollListener)} methods instead of
+ * {@link #setOnScrollListener(OnScrollListener)}. Calling
+ * {@link #setOnScrollListener(OnScrollListener)} will cause {@link UnsupportedOperationException}.
+ *
  * @author Slava Yasevich
  */
 public final class EndlessRecyclerView extends RecyclerView {
@@ -48,12 +70,20 @@ public final class EndlessRecyclerView extends RecyclerView {
         return adapterWrapper.getAdapter();
     }
 
+    /**
+     * Use {@link #addOnScrollListener(OnScrollListener)} and
+     * {@link #removeOnScrollListener(OnScrollListener)} methods instead. Calling this method will
+     * cause {@link UnsupportedOperationException}.
+     */
     @Override
     public void setOnScrollListener(OnScrollListener listener) {
         throw new UnsupportedOperationException("use addOnScrollListener(OnScrollListener) and " +
                 "removeOnScrollListener(OnScrollListener) instead");
     }
 
+    /**
+     * @param layout instances of {@link LinearLayoutManager} only
+     */
     @Override
     public void setLayoutManager(LayoutManager layout) {
         if (layout instanceof LinearLayoutManager) {
@@ -69,6 +99,11 @@ public final class EndlessRecyclerView extends RecyclerView {
         return (LinearLayoutManager) super.getLayoutManager();
     }
 
+    /**
+     * Adds {@link RecyclerView.OnScrollListener} to use with this view.
+     *
+     * @param listener listener to add
+     */
     public void addOnScrollListener(OnScrollListener listener) {
         if (listener == null) {
             throw new NullPointerException("listener is null");
@@ -76,6 +111,11 @@ public final class EndlessRecyclerView extends RecyclerView {
         onScrollListeners.add(listener);
     }
 
+    /**
+     * Removes {@link RecyclerView.OnScrollListener} to use with this view.
+     *
+     * @param listener listener to remove
+     */
     public void removeOnScrollListener(OnScrollListener listener) {
         if (listener == null) {
             throw new NullPointerException("listener is null");
@@ -83,6 +123,11 @@ public final class EndlessRecyclerView extends RecyclerView {
         onScrollListeners.remove(listener);
     }
 
+    /**
+     * Sets {@link EndlessRecyclerView.Pager} to use with the view.
+     *
+     * @param pager pager to set or {@code null} to clear current pager
+     */
     public void setPager(Pager pager) {
         if (pager != null) {
             endlessScrollListener = new EndlessScrollListener(pager);
@@ -93,6 +138,12 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
     }
 
+    /**
+     * Sets threshold to use. Only positive numbers are allowed. This value is used to determine if
+     * loading should start when user scrolls the view down. Default value is 1.
+     *
+     * @param threshold positive number
+     */
     public void setThreshold(int threshold) {
         if (endlessScrollListener == null) {
             throw new NullPointerException("no pager provided");
@@ -100,21 +151,35 @@ public final class EndlessRecyclerView extends RecyclerView {
         endlessScrollListener.setThreshold(threshold);
     }
 
+    /**
+     * Sets progress view to show on the bottom of the list when loading starts.
+     *
+     * @param layoutResId layout resource ID
+     */
     public void setProgressView(int layoutResId) {
         setProgressView(LayoutInflater
                 .from(getContext())
                 .inflate(layoutResId, this, false));
     }
 
+    /**
+     * Sets progress view to show on the bottom of the list when loading starts.
+     *
+     * @param view the view
+     */
     public void setProgressView(View view) {
         progressView = view;
     }
 
+    /**
+     * If async operation completed you may want to call this method to hide progress view.
+     *
+     * @param refreshing {@code true} if list is currently refreshing, {@code false} otherwise
+     */
     public void setRefreshing(boolean refreshing) {
         if (this.refreshing == refreshing) {
             return;
         }
-        System.out.println("refreshing=" + refreshing + ";at=" + System.currentTimeMillis());
         this.refreshing = refreshing;
         this.adapterWrapper.notifyDataSetChanged();
     }
@@ -187,7 +252,6 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public int getItemCount() {
-            System.out.println("refreshing=" + refreshing);
             return adapter.getItemCount() + (refreshing && progressView != null ? 1 : 0);
         }
 
@@ -279,8 +343,18 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
     }
 
+    /**
+     * Pager interface.
+     */
     public interface Pager {
+        /**
+         * @return {@code true} if pager should load new page
+         */
         boolean shouldLoad();
+
+        /**
+         * Starts loading operation.
+         */
         void loadNextPage();
     }
 }
