@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 Slava Yasevich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.yasevich.endlessrecyclerview;
 
 import android.content.Context;
@@ -26,13 +42,18 @@ import java.util.List;
  * of a list but you can opt this behaviour using {@link #setThreshold(int)} method.
  * <p>
  * If you want to show progress on the bottom of a list you may set a progress view using
- * {@link #setProgressView(int)} or {@link #setProgressView(View)} methods.
+ * {@link #setProgressView(int)} or {@link #setProgressView(View)} methods. You should keep in mind
+ * that in order to show progress view on the bottom of {@code EndlessRecyclerView} it will wrap
+ * provided adapter and add new {@link RecyclerView.ViewHolder}'s view type. Its value is -1.
  * <p>
  * If you need to set {@link RecyclerView.OnScrollListener} with this view you must use
  * {@link #addOnScrollListener(OnScrollListener)} and
  * {@link #removeOnScrollListener(OnScrollListener)} methods instead of
  * {@link #setOnScrollListener(OnScrollListener)}. Calling
  * {@link #setOnScrollListener(OnScrollListener)} will cause {@link UnsupportedOperationException}.
+ * <p>
+ * If you use {@link RecyclerView.Adapter} with stable ids and want to show progress view, you
+ * should keep in mind that view holder of progress view will have {@code NO_ID}.
  *
  * @author Slava Yasevich
  */
