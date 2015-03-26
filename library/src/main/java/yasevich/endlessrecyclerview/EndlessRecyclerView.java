@@ -44,6 +44,7 @@ public final class EndlessRecyclerView extends RecyclerView {
     private AdapterWrapper adapterWrapper;
     private View progressView;
     private boolean refreshing;
+    private int threshold = 1;
 
     public EndlessRecyclerView(Context context) {
         this(context, null);
@@ -131,6 +132,7 @@ public final class EndlessRecyclerView extends RecyclerView {
     public void setPager(Pager pager) {
         if (pager != null) {
             endlessScrollListener = new EndlessScrollListener(pager);
+            endlessScrollListener.setThreshold(threshold);
             addOnScrollListener(endlessScrollListener);
         } else if (endlessScrollListener != null) {
             removeOnScrollListener(endlessScrollListener);
@@ -145,10 +147,10 @@ public final class EndlessRecyclerView extends RecyclerView {
      * @param threshold positive number
      */
     public void setThreshold(int threshold) {
-        if (endlessScrollListener == null) {
-            throw new NullPointerException("no pager provided");
+        this.threshold = threshold;
+        if (endlessScrollListener != null) {
+            endlessScrollListener.setThreshold(threshold);
         }
-        endlessScrollListener.setThreshold(threshold);
     }
 
     /**
