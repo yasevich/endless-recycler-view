@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,8 @@ import java.util.List;
  * @author Slava Yasevich
  */
 public final class EndlessRecyclerView extends RecyclerView {
+
+    private static final String TAG = EndlessRecyclerView.class.getSimpleName() + "tag ";
 
     private final List<OnScrollListener> onScrollListeners = new ArrayList<>();
 
@@ -290,9 +293,9 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public int getItemCount() {
-            int refreshingItems = refreshingBottom && progressViewResId != null ? 1 : 0;
-            refreshingItems += refreshingTop && progressViewResId != null ? 1 : 0;
-            return adapter.getItemCount() + refreshingItems;
+            int bottom = refreshingBottom && progressViewResId != null ? 1 : 0;
+            int top = refreshingTop && progressViewResId != null ? 1 : 0;
+            return adapter.getItemCount() + top + bottom;
         }
 
         @Override
@@ -300,13 +303,21 @@ public final class EndlessRecyclerView extends RecyclerView {
             if (position == 0) {
                 return refreshingTop ? NO_ID : adapter.getItemId(0);
             } else {
-                return position == adapter.getItemCount() ? NO_ID : adapter.getItemId(position);
+                if (refreshingTop) {
+                    return position - 1 >= adapter.getItemCount() ? NO_ID : adapter.getItemId(position - 1);
+                } else {
+                    return position >= adapter.getItemCount() ? NO_ID : adapter.getItemId(position);
+                }
             }
         }
 
         @Override
         public int getItemViewType(int position) {
-            return ((refreshingBottom && position >= adapter.getItemCount()) || (refreshingTop && position == 0)) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position);
+            if (refreshingTop) {
+                return ((refreshingBottom && position - 1 >= adapter.getItemCount()) || position == 0) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position - 1);
+            } else {
+                return ((refreshingBottom && position >= adapter.getItemCount())) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position);
+            }
         }
 
         @Override
@@ -317,11 +328,14 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            if (position == 0 && !refreshingTop) {
-                adapter.onBindViewHolder(holder, position);
-            }
-            if (position > 0 && position < adapter.getItemCount()) {
-                adapter.onBindViewHolder(holder, position);
+            if (refreshingTop) {
+                if (position != 0 && position - 1 < adapter.getItemCount()) {
+                    adapter.onBindViewHolder(holder, position - 1);
+                }
+            } else {
+                if (position < adapter.getItemCount()) {
+                    adapter.onBindViewHolder(holder, position);
+                }
             }
         }
 
@@ -350,26 +364,23 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public void onViewAttachedToWindow(ViewHolder holder) {
-            if (progressViewHolders.contains(holder)) {
-                return;
+            if (!progressViewHolders.contains(holder)) {
+                adapter.onViewAttachedToWindow(holder);
             }
-            adapter.onViewAttachedToWindow(holder);
         }
 
         @Override
         public void onViewDetachedFromWindow(ViewHolder holder) {
-            if (progressViewHolders.contains(holder)) {
-                return;
+            if (!progressViewHolders.contains(holder)) {
+                adapter.onViewDetachedFromWindow(holder);
             }
-            adapter.onViewDetachedFromWindow(holder);
         }
 
         @Override
         public void onViewRecycled(ViewHolder holder) {
-            if (progressViewHolders.contains(holder)) {
-                return;
+            if (!progressViewHolders.contains(holder)) {
+                adapter.onViewRecycled(holder);
             }
-            adapter.onViewRecycled(holder);
         }
 
         @Override
