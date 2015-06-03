@@ -61,8 +61,8 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
     }
 
     private List<Integer> generateData() {
-        List<Integer> initialData = new ArrayList<>(20);
-        for (int i = 0; i < 20; i++) {
+        List<Integer> initialData = new ArrayList<>(30);
+        for (int i = 0; i < 30; i++) {
             initialData.add(randomInt());
         }
         return initialData;
