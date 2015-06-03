@@ -35,7 +35,7 @@ import java.util.Random;
  * @author Slava Yasevich
  */
 public final class MainActivity extends Activity implements EndlessRecyclerView.Pager {
-    
+
     private static final long DELAY = 1000L;
 
     private List<Integer> data = generateData();

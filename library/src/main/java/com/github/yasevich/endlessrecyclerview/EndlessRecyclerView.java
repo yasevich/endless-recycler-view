@@ -41,10 +41,11 @@ import java.util.List;
  * By default {@code EndlessRecyclerView} starts loading operation when you are at the very bottom
  * of a list but you can opt this behaviour using {@link #setThreshold(int)} method.
  * <p>
- * If you want to show progress on the bottom of a list you may set a progress view using
- * {@link #setProgressView(int)} or {@link #setProgressView(View)} methods. You should keep in mind
- * that in order to show progress view on the bottom of {@code EndlessRecyclerView} it will wrap
- * provided adapter and add new {@link RecyclerView.ViewHolder}'s view type. Its value is -1.
+ * If you want to show progress on the top or bottom of a list you may set a progress view using
+ * {@link #setProgressView(int)} or {@link #setProgressView(View)}.
+ * You should keep in mind that in order to show progress view on the bottom of
+ * {@code EndlessRecyclerView} it will wrap provided adapter and add new
+ * {@link RecyclerView.ViewHolder}'s view type. Its value is -1.
  * <p>
  * If you need to set {@link RecyclerView.OnScrollListener} with this view you must use
  * {@link #addOnScrollListener(OnScrollListener)} and
@@ -64,10 +65,9 @@ public final class EndlessRecyclerView extends RecyclerView {
     private EndlessScrollListener endlessScrollListener;
     private AdapterWrapper adapterWrapper;
 
-    private View progressViewBottom;
-    private boolean refreshingBottom;
+    private View progressView;
 
-    private View progressViewTop;
+    private boolean refreshingBottom;
     private boolean refreshingTop;
 
     private int threshold = 1;
@@ -180,7 +180,7 @@ public final class EndlessRecyclerView extends RecyclerView {
     }
 
     /**
-     * Sets progress view to show on the bottom of the list when loading starts.
+     * Sets progress view to show on the top or bottom of the list when loading starts.
      *
      * @param layoutResId layout resource ID
      */
@@ -190,23 +190,13 @@ public final class EndlessRecyclerView extends RecyclerView {
                 .inflate(layoutResId, this, false));
     }
 
-    public void setProgressViewTop(int layoutResId) {
-        setProgressViewTop(LayoutInflater
-                .from(getContext())
-                .inflate(layoutResId, this, false));
-    }
-
     /**
-     * Sets progress view to show on the bottom of the list when loading starts.
+     * Sets progress view to show on the top or bottom of the list when loading starts.
      *
      * @param view the view
      */
     public void setProgressView(View view) {
-        progressViewBottom = view;
-    }
-
-    public void setProgressViewTop(View view) {
-        progressViewTop = view;
+        progressView = view;
     }
 
     /**
@@ -222,6 +212,11 @@ public final class EndlessRecyclerView extends RecyclerView {
         this.adapterWrapper.notifyDataSetChanged();
     }
 
+    /**
+     * If async operation completed you may want to call this method to hide progress view.
+     *
+     * @param refreshingTop {@code true} if list is currently refreshingTop, {@code false} otherwise
+     */
     public void setRefreshingTop(boolean refreshingTop) {
         if (this.refreshingTop == refreshingTop) {
             return;
@@ -305,8 +300,8 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public int getItemCount() {
-            int refreshingItems = refreshingBottom && progressViewBottom != null ? 1 : 0;
-            refreshingItems += refreshingTop && progressViewTop != null ? 1 : 0;
+            int refreshingItems = refreshingBottom && progressView != null ? 1 : 0;
+            refreshingItems += refreshingTop && progressView != null ? 1 : 0;
             return adapter.getItemCount() + refreshingItems;
         }
 
@@ -399,7 +394,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         private final class ProgressViewHolder extends ViewHolder {
             public ProgressViewHolder() {
-                super(progressViewBottom);
+                super(progressView);
             }
         }
     }
