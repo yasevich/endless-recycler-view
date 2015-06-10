@@ -37,7 +37,8 @@ import java.util.List;
  * Implement {@link Pager} interface to determine when {@code EndlessRecyclerView} should start
  * loading process and a way to perform async operation. Use {@link #setPager(Pager)} method to set
  * or reset current pager. When async operation complete you may want to call
- * {@link #setRefreshingBottom(boolean)} method to hide progress view if it was provided.
+ * {@link #setRefreshingTop(boolean)} or {@link #setRefreshingBottom(boolean)} method to hide
+ * progress view if it was provided.
  * <p>
  * By default {@code EndlessRecyclerView} starts loading operation when you are at the very bottom
  * of a list but you can opt this behaviour using {@link #setThreshold(int)} method.
