@@ -61,8 +61,6 @@ import java.util.List;
  */
 public final class EndlessRecyclerView extends RecyclerView {
 
-    private static final String TAG = EndlessRecyclerView.class.getSimpleName() + "tag ";
-
     private final List<OnScrollListener> onScrollListeners = new ArrayList<>();
 
     private EndlessScrollListener endlessScrollListener;
@@ -253,7 +251,7 @@ public final class EndlessRecyclerView extends RecyclerView {
             int lastVisibleItemPosition = getLayoutManager().findLastVisibleItemPosition();
             int lastItemPosition = getAdapter().getItemCount();
 
-            if (pager.shouldLoadBottom() && lastItemPosition - lastVisibleItemPosition <= threshold) {
+            if (lastItemPosition - lastVisibleItemPosition <= threshold && pager.shouldLoadBottom()) {
                 setRefreshingBottom(true);
                 pager.loadNextBottomPage();
             }
@@ -261,7 +259,7 @@ public final class EndlessRecyclerView extends RecyclerView {
             int firstVisibleItemPosition = getLayoutManager().findFirstVisibleItemPosition();
             int firstItemPosition = 0;
 
-            if (pager.shouldLoadTop() && firstVisibleItemPosition - firstItemPosition <= threshold) {
+            if (firstVisibleItemPosition - firstItemPosition <= threshold && !refreshingTop && pager.shouldLoadTop()) {
                 setRefreshingTop(true);
                 pager.loadNextTopPage();
             }
@@ -431,3 +429,4 @@ public final class EndlessRecyclerView extends RecyclerView {
         void loadNextTopPage();
     }
 }
+
