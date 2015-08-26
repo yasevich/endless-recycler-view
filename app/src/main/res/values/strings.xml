@@ -16,4 +16,6 @@
 
 <resources>
     <string name="app_name">EndlessRecyclerView</string>
+    <string name="demo_linear">LinearLayoutManager RecyclerView</string>
+    <string name="demo_staggered">StaggeredLayoutManager RecyclerView</string>
 </resources>
