@@ -55,6 +55,17 @@ list.setAdapter(adapter);
 list.setPager(this);
 ```
 
+Or
+
+```java
+EndlessRecyclerView list = ...; // initialization
+list.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+list.setProgressView(R.layout.item_progress);
+list.setAdapter(adapter);
+list.setPager(this);
+```
+
+
 ### Also
 
 When page is loaded you may want to stop showing progress view:
