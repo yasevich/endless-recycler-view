@@ -19,6 +19,7 @@ package com.github.yasevich.endlessrecyclerview;
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,6 +67,7 @@ public final class EndlessRecyclerView extends RecyclerView {
     private View progressView;
     private boolean refreshing;
     private int threshold = 1;
+    private int layoutManagerType;
 
     public EndlessRecyclerView(Context context) {
         this(context, null);
@@ -104,21 +106,26 @@ public final class EndlessRecyclerView extends RecyclerView {
     }
 
     /**
-     * @param layout instances of {@link LinearLayoutManager} only
+     * @param layout instances of {@link LinearLayoutManager} or {@link StaggeredGridLayoutManager} only
      */
     @Override
-    public void setLayoutManager(LayoutManager layout) {
-        if (layout instanceof LinearLayoutManager) {
+    public void setLayoutManager(LayoutManager layout)
+    {
+        if (layout instanceof LinearLayoutManager )
+        {
             super.setLayoutManager(layout);
-        } else {
-            throw new IllegalArgumentException(
-                    "layout manager must be an instance of LinearLayoutManager");
+            layoutManagerType = EndlessScrollListener.LINEAR;
         }
-    }
-
-    @Override
-    public LinearLayoutManager getLayoutManager() {
-        return (LinearLayoutManager) super.getLayoutManager();
+        else if(layout instanceof StaggeredGridLayoutManager)
+        {
+            super.setLayoutManager(layout);
+            layoutManagerType = EndlessScrollListener.STAGGERED;
+        }
+        else
+        {
+            throw new IllegalArgumentException(
+                    "layout manager must be an instance of LinearLayoutManager or StaggeredGridLayoutManager");
+        }
     }
 
     /**
@@ -150,9 +157,13 @@ public final class EndlessRecyclerView extends RecyclerView {
      *
      * @param pager pager to set or {@code null} to clear current pager
      */
+
     public void setPager(Pager pager) {
         if (pager != null) {
-            endlessScrollListener = new EndlessScrollListener(pager);
+            endlessScrollListener = EndlessScrollListener.newInstance(layoutManagerType,this,pager);
+            if ( endlessScrollListener == null )
+                throw new UnsupportedOperationException("unsupported layout manager type");
+
             endlessScrollListener.setThreshold(threshold);
             addOnScrollListener(endlessScrollListener);
         } else if (endlessScrollListener != null) {
@@ -207,6 +218,10 @@ public final class EndlessRecyclerView extends RecyclerView {
         this.adapterWrapper.notifyDataSetChanged();
     }
 
+    protected boolean isRefreshing() {
+        return refreshing;
+    }
+
     private final class OnScrollListenerImpl extends OnScrollListener {
 
         @Override
@@ -224,38 +239,6 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
     }
 
-    private final class EndlessScrollListener extends OnScrollListener {
-
-        private final Pager pager;
-
-        private int threshold = 1;
-
-        public EndlessScrollListener(Pager pager) {
-            if (pager == null) {
-                throw new NullPointerException("pager is null");
-            }
-            this.pager = pager;
-        }
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            int lastVisibleItemPosition = getLayoutManager()
-                    .findLastVisibleItemPosition();
-            int lastItemPosition = getAdapter().getItemCount();
-
-            if (pager.shouldLoad() && lastItemPosition - lastVisibleItemPosition <= threshold) {
-                setRefreshing(true);
-                pager.loadNextPage();
-            }
-        }
-
-        public void setThreshold(int threshold) {
-            if (threshold <= 0) {
-                throw new IllegalArgumentException("illegal threshold: " + threshold);
-            }
-            this.threshold = threshold;
-        }
-    }
 
     private final class AdapterWrapper extends Adapter<ViewHolder> {
 

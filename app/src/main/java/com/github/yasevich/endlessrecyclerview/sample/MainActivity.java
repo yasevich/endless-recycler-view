@@ -17,10 +17,13 @@
 package com.github.yasevich.endlessrecyclerview.sample;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -32,9 +35,13 @@ import com.github.yasevich.endlessrecyclerview.EndlessRecyclerView;
  */
 public final class MainActivity extends Activity implements EndlessRecyclerView.Pager {
 
+    public static final int LAYOUT_LINEAR = 0;
+    public static final int LAYOUT_STAGGERED = 1;
+
     private static final int ITEMS_ON_PAGE = 8;
     private static final int TOTAL_PAGES = 10;
     private static final long DELAY = 1000L;
+    private static final String PARAM_LAYOUT = "PARAM_LAYOUT";
 
     private final Adapter adapter = new Adapter();
     private final Handler handler = new Handler();
@@ -42,13 +49,43 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
     private EndlessRecyclerView list;
     private boolean loading = false;
 
+
+    public static void lanuchActivity(Context context,int type)
+    {
+        Intent i = new Intent(context,MainActivity.class);
+        i.putExtra(PARAM_LAYOUT,type);
+        context.startActivity(i);
+    }
+
+    private static int intent2type(Intent intent)
+    {
+        if ( intent != null ) return intent.getIntExtra(PARAM_LAYOUT,0);
+        else return 0;
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        RecyclerView.LayoutManager layoutManager;
+        int type = intent2type(getIntent());
+        switch (type)
+        {
+
+            case LAYOUT_STAGGERED:
+                layoutManager = new StaggeredGridLayoutManager(3
+                        , StaggeredGridLayoutManager.VERTICAL);
+                break;
+            case LAYOUT_LINEAR:
+            default:
+                layoutManager = new LinearLayoutManager(this);
+                break;
+        }
+
         list = (EndlessRecyclerView) findViewById(android.R.id.list);
-        list.setLayoutManager(new LinearLayoutManager(this));
+        list.setLayoutManager(layoutManager);
         list.setProgressView(R.layout.item_progress);
         list.setAdapter(adapter);
         list.setPager(this);
@@ -78,9 +115,21 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         adapter.setCount(adapter.getItemCount() + ITEMS_ON_PAGE);
     }
 
+
+
     private static final class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
         private int count;
+        private static final String[] dummy = {"To be, or not to be: that is the question."
+                , "Whether 'tis nobler in the mind to suffer The slings and arrows of outrageous fortune, "
+                , "Or to take arms against a sea of troubles, And by opposing end them."
+                , "To die: to sleep; No more; and by a sleep to say we end The heart-ache, "
+                , "and the thousand natural shocks That flesh is heir to"
+                , "'tis a consummation Devoutly to be wish'd. To die, to sleep;"
+                , "To sleep: perchance to dream: aye, there's the rub; "
+                , "For in that sleep of death what dreams may come, When we have shuffled off this mortal coil, "
+                , "Must give us pause: there's the respect That makes calamity of so long life;"
+            };
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -89,7 +138,8 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.text.setText("Item: " + (position + 1));
+            holder.text.setText( dummy[position % dummy.length]
+                    + "\nItem: " + (position + 1) + "\n");
         }
 
         @Override
