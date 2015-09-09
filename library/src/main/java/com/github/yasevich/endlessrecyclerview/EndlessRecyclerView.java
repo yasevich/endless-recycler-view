@@ -37,7 +37,7 @@ import java.util.List;
  * Implement {@link Pager} interface to determine when {@code EndlessRecyclerView} should start
  * loading process and a way to perform async operation. Use {@link #setPager(Pager)} method to set
  * or reset current pager. When async operation complete you may want to call
- * {@link #setRefreshingTop(boolean)} or {@link #setRefreshingBottom(boolean)} method to hide
+ * {@link #setRefreshingPrev(boolean)} or {@link #setRefreshingNext(boolean)} method to hide
  * progress view if it was provided.
  * <p>
  * By default {@code EndlessRecyclerView} starts loading operation when you are at the very bottom
@@ -47,28 +47,27 @@ import java.util.List;
  * {@link #setProgressView(int)}.
  * You should keep in mind that in order to show progress view on the bottom of
  * {@code EndlessRecyclerView} it will wrap provided adapter and add new
- * {@link RecyclerView.ViewHolder}'s view type. Its value is -1.
+ * {@link ViewHolder}'s view type. Its value is -1.
  * <p>
- * If you need to set {@link RecyclerView.OnScrollListener} with this view you must use
+ * If you need to set {@link OnScrollListener} with this view you must use
  * {@link #addOnScrollListener(OnScrollListener)} and
  * {@link #removeOnScrollListener(OnScrollListener)} methods instead of
  * {@link #setOnScrollListener(OnScrollListener)}. Calling
  * {@link #setOnScrollListener(OnScrollListener)} will cause {@link UnsupportedOperationException}.
  * <p>
- * If you use {@link RecyclerView.Adapter} with stable ids and want to show progress view, you
+ * If you use {@link Adapter} with stable ids and want to show progress view, you
  * should keep in mind that view holder of progress view will have {@code NO_ID}.
  *
- * @author Slava Yasevich
  */
 public final class EndlessRecyclerView extends RecyclerView {
 
-    private final List<OnScrollListener> onScrollListeners = new ArrayList<>();
+    private final List<RecyclerView.OnScrollListener> onScrollListeners = new ArrayList<>();
 
     private EndlessScrollListener endlessScrollListener;
     private AdapterWrapper adapterWrapper;
 
-    private boolean refreshingBottom;
-    private boolean refreshingTop;
+    private boolean refreshingNext;
+    private boolean refreshingPrev;
 
     private int threshold = 1;
 
@@ -96,7 +95,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
     @Override
     public Adapter getAdapter() {
-        return adapterWrapper.getAdapter();
+        return adapterWrapper;
     }
 
     /**
@@ -129,7 +128,7 @@ public final class EndlessRecyclerView extends RecyclerView {
     }
 
     /**
-     * Adds {@link RecyclerView.OnScrollListener} to use with this view.
+     * Adds {@link OnScrollListener} to use with this view.
      *
      * @param listener listener to add
      */
@@ -141,7 +140,7 @@ public final class EndlessRecyclerView extends RecyclerView {
     }
 
     /**
-     * Removes {@link RecyclerView.OnScrollListener} to use with this view.
+     * Removes {@link OnScrollListener} to use with this view.
      *
      * @param listener listener to remove
      */
@@ -190,31 +189,44 @@ public final class EndlessRecyclerView extends RecyclerView {
         progressViewResId = viewResId;
     }
 
-    /**
-     * If async operation completed you may want to call this method to hide progress view.
-     *
-     * @param refreshingBottom {@code true} if list is currently refreshingBottom, {@code false} otherwise
-     */
-    public void setRefreshingBottom(boolean refreshingBottom) {
-        if (this.refreshingBottom == refreshingBottom) {
-            return;
-        }
-        this.refreshingBottom = refreshingBottom;
-
-        this.adapterWrapper.notifyDataSetChanged();
+    public boolean isRefreshingPrev() {
+        return refreshingPrev;
     }
 
     /**
      * If async operation completed you may want to call this method to hide progress view.
      *
-     * @param refreshingTop {@code true} if list is currently refreshingTop, {@code false} otherwise
+     * @param refreshingNext {@code true} if list is currently refreshingNext, {@code false} otherwise
      */
-    public void setRefreshingTop(boolean refreshingTop) {
-        if (this.refreshingTop == refreshingTop) {
+    public void setRefreshingNext(boolean refreshingNext) {
+        if (this.refreshingNext == refreshingNext) {
             return;
         }
-        this.refreshingTop = refreshingTop;
-        this.adapterWrapper.notifyDataSetChanged();
+        this.refreshingNext = refreshingNext;
+        if (!refreshingNext)
+            this.adapterWrapper.notifyItemRemoved(adapterWrapper.getItemCount() - 1);
+        else
+            this.adapterWrapper.notifyItemRangeInserted(adapterWrapper.getItemCount() - 1, 1);
+    }
+
+    public boolean isRefreshingNext() {
+        return refreshingNext;
+    }
+
+    /**
+     * If async operation completed you may want to call this method to hide progress view.
+     *
+     * @param refreshingPrev {@code true} if list is currently refreshingPrev, {@code false} otherwise
+     */
+    public void setRefreshingPrev(boolean refreshingPrev) {
+        if (this.refreshingPrev == refreshingPrev) {
+            return;
+        }
+        this.refreshingPrev = refreshingPrev;
+        if (!refreshingPrev)
+            this.adapterWrapper.notifyItemRemoved(0);
+        else
+            this.adapterWrapper.notifyItemRangeInserted(0, 1);
     }
 
     private final class OnScrollListenerImpl extends OnScrollListener {
@@ -252,17 +264,17 @@ public final class EndlessRecyclerView extends RecyclerView {
             int lastVisibleItemPosition = getLayoutManager().findLastVisibleItemPosition();
             int lastItemPosition = getAdapter().getItemCount();
 
-            if (lastItemPosition - lastVisibleItemPosition <= threshold && pager.shouldLoadBottom()) {
-                setRefreshingBottom(true);
-                pager.loadNextBottomPage();
+            if (lastItemPosition - lastVisibleItemPosition <= threshold && !refreshingNext && pager.shouldLoadNext()) {
+                setRefreshingNext(true);
+                pager.loadNextPage();
             }
 
             int firstVisibleItemPosition = getLayoutManager().findFirstVisibleItemPosition();
             int firstItemPosition = 0;
 
-            if (firstVisibleItemPosition - firstItemPosition <= threshold && !refreshingTop && pager.shouldLoadTop()) {
-                setRefreshingTop(true);
-                pager.loadNextTopPage();
+            if (firstVisibleItemPosition - firstItemPosition <= threshold && !refreshingPrev && pager.shouldLoadPrev()) {
+                setRefreshingPrev(true);
+                pager.loadPrevPage();
             }
         }
 
@@ -274,15 +286,15 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
     }
 
-    private final class AdapterWrapper extends Adapter<ViewHolder> {
+    private final class AdapterWrapper extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private static final int PROGRESS_VIEW_TYPE = -1;
 
-        private final Adapter<ViewHolder> adapter;
+        private final RecyclerView.Adapter<RecyclerView.ViewHolder> adapter;
 
         private List<ProgressViewHolder> progressViewHolders = new ArrayList<>();
 
-        public AdapterWrapper(Adapter<ViewHolder> adapter) {
+        public AdapterWrapper(RecyclerView.Adapter<RecyclerView.ViewHolder> adapter) {
             if (adapter == null) {
                 throw new NullPointerException("adapter is null");
             }
@@ -292,17 +304,17 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public int getItemCount() {
-            int bottom = refreshingBottom && progressViewResId != null ? 1 : 0;
-            int top = refreshingTop && progressViewResId != null ? 1 : 0;
+            int bottom = refreshingNext && progressViewResId != null ? 1 : 0;
+            int top = refreshingPrev && progressViewResId != null ? 1 : 0;
             return adapter.getItemCount() + top + bottom;
         }
 
         @Override
         public long getItemId(int position) {
             if (position == 0) {
-                return refreshingTop ? NO_ID : adapter.getItemId(0);
+                return refreshingPrev ? NO_ID : adapter.getItemId(0);
             } else {
-                if (refreshingTop) {
+                if (refreshingPrev) {
                     return position - 1 >= adapter.getItemCount() ? NO_ID : adapter.getItemId(position - 1);
                 } else {
                     return position >= adapter.getItemCount() ? NO_ID : adapter.getItemId(position);
@@ -312,10 +324,10 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public int getItemViewType(int position) {
-            if (refreshingTop) {
-                return ((refreshingBottom && position - 1 >= adapter.getItemCount()) || position == 0) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position - 1);
+            if (refreshingPrev) {
+                return ((refreshingNext && position - 1 >= adapter.getItemCount()) || position == 0) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position - 1);
             } else {
-                return ((refreshingBottom && position >= adapter.getItemCount())) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position);
+                return ((refreshingNext && position >= adapter.getItemCount())) ? PROGRESS_VIEW_TYPE : adapter.getItemViewType(position);
             }
         }
 
@@ -327,7 +339,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            if (refreshingTop) {
+            if (refreshingPrev) {
                 if (position != 0 && position - 1 < adapter.getItemCount()) {
                     adapter.onBindViewHolder(holder, position - 1);
                 }
@@ -394,7 +406,7 @@ public final class EndlessRecyclerView extends RecyclerView {
             adapter.unregisterAdapterDataObserver(observer);
         }
 
-        public Adapter<ViewHolder> getAdapter() {
+        public RecyclerView.Adapter<RecyclerView.ViewHolder> getAdapter() {
             return adapter;
         }
 
@@ -410,24 +422,24 @@ public final class EndlessRecyclerView extends RecyclerView {
      */
     public interface Pager {
         /**
-         * @return {@code true} if pager should load new bottom page
+         * @return {@code true} if pager should load next page
          */
-        boolean shouldLoadBottom();
+        boolean shouldLoadNext();
 
         /**
-         * Starts bottom loading operation.
+         * Starts loading next page.
          */
-        void loadNextBottomPage();
+        void loadNextPage();
 
         /**
-         * @return {@code true} if pager should load new top page
+         * @return {@code true} if pager should load new previous page
          */
-        boolean shouldLoadTop();
+        boolean shouldLoadPrev();
 
         /**
-         * Starts top loading operation.
+         * Starts loading previous page.
          */
-        void loadNextTopPage();
+        void loadPrevPage();
     }
 }
 
