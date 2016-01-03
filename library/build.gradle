@@ -1,28 +1,42 @@
 apply plugin: 'com.android.library'
 apply plugin: 'bintray-release'
 
+ext {
+    versionMajor = 1
+    versionMinor = 0
+    versionPatch = 0
+}
+
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion rootProject.ext.targetSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode libVersionCode()
+        versionName libVersionName()
     }
 }
 
 dependencies {
-    compile 'com.android.support:recyclerview-v7:22.0.0'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
 }
 
 publish {
     userOrg = 'slava'
     groupId = 'com.github.yasevich'
     artifactId = 'endless-recycler-view'
-    version = '1.0'
+    version = libVersionName()
     website = 'https://github.com/yasevich/endless-recycler-view'
     issueTracker = "${website}/issues"
     repository = "${website}.git"
+}
+
+def libVersionCode() {
+    return versionMajor * 10000 + versionMinor * 100 + versionPatch
+}
+
+def libVersionName() {
+    return "${versionMajor}.${versionMinor}.${versionPatch}"
 }
