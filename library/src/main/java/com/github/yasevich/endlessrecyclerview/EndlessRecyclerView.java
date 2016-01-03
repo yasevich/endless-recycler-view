@@ -17,15 +17,13 @@
 package com.github.yasevich.endlessrecyclerview;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * {@code EndlessRecyclerView} lets you to load new pages when a user scrolls down to the bottom of
@@ -59,8 +57,6 @@ import java.util.List;
  */
 public final class EndlessRecyclerView extends RecyclerView {
 
-    private final List<OnScrollListener> onScrollListeners = new ArrayList<>();
-
     private EndlessScrollListener endlessScrollListener;
     private AdapterWrapper adapterWrapper;
     private View progressView;
@@ -71,13 +67,12 @@ public final class EndlessRecyclerView extends RecyclerView {
         this(context, null);
     }
 
-    public EndlessRecyclerView(Context context, AttributeSet attrs) {
+    public EndlessRecyclerView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public EndlessRecyclerView(Context context, AttributeSet attrs, int defStyle) {
+    public EndlessRecyclerView(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        super.setOnScrollListener(new OnScrollListenerImpl());
     }
 
     @Override
@@ -119,30 +114,6 @@ public final class EndlessRecyclerView extends RecyclerView {
     @Override
     public LinearLayoutManager getLayoutManager() {
         return (LinearLayoutManager) super.getLayoutManager();
-    }
-
-    /**
-     * Adds {@link RecyclerView.OnScrollListener} to use with this view.
-     *
-     * @param listener listener to add
-     */
-    public void addOnScrollListener(OnScrollListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("listener is null");
-        }
-        onScrollListeners.add(listener);
-    }
-
-    /**
-     * Removes {@link RecyclerView.OnScrollListener} to use with this view.
-     *
-     * @param listener listener to remove
-     */
-    public void removeOnScrollListener(OnScrollListener listener) {
-        if (listener == null) {
-            throw new NullPointerException("listener is null");
-        }
-        onScrollListeners.remove(listener);
     }
 
     /**
@@ -205,23 +176,6 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
         this.refreshing = refreshing;
         this.adapterWrapper.notifyDataSetChanged();
-    }
-
-    private final class OnScrollListenerImpl extends OnScrollListener {
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            for (OnScrollListener listener : onScrollListeners) {
-                listener.onScrolled(recyclerView, dx, dy);
-            }
-        }
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            for (OnScrollListener listener : onScrollListeners) {
-                listener.onScrollStateChanged(recyclerView, newState);
-            }
-        }
     }
 
     private final class EndlessScrollListener extends OnScrollListener {
