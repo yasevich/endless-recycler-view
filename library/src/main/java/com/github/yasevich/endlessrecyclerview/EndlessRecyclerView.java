@@ -17,9 +17,11 @@
 package com.github.yasevich.endlessrecyclerview;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +60,7 @@ import android.view.ViewGroup;
 public final class EndlessRecyclerView extends RecyclerView {
 
     private EndlessScrollListener endlessScrollListener;
+    private LayoutManagerWrapper layoutManagerWrapper;
     private AdapterWrapper adapterWrapper;
     private View progressView;
     private boolean refreshing;
@@ -102,18 +105,9 @@ public final class EndlessRecyclerView extends RecyclerView {
      * @param layout instances of {@link LinearLayoutManager} only
      */
     @Override
-    public void setLayoutManager(LayoutManager layout) {
-        if (layout instanceof LinearLayoutManager) {
-            super.setLayoutManager(layout);
-        } else {
-            throw new IllegalArgumentException(
-                    "layout manager must be an instance of LinearLayoutManager");
-        }
-    }
-
-    @Override
-    public LinearLayoutManager getLayoutManager() {
-        return (LinearLayoutManager) super.getLayoutManager();
+    public void setLayoutManager(@Nullable LayoutManager layout) {
+        layoutManagerWrapper = layout == null ? null : new LayoutManagerWrapper(layout);
+        super.setLayoutManager(layout);
     }
 
     /**
@@ -178,6 +172,58 @@ public final class EndlessRecyclerView extends RecyclerView {
         this.adapterWrapper.notifyDataSetChanged();
     }
 
+    private static final class LayoutManagerWrapper {
+
+        @NonNull
+        final LayoutManager layoutManager;
+
+        @NonNull
+        private final LayoutManagerResolver resolver;
+
+        public LayoutManagerWrapper(@NonNull LayoutManager layoutManager) {
+            this.layoutManager = layoutManager;
+            this.resolver = getResolver(layoutManager);
+        }
+
+        @NonNull
+        private static LayoutManagerResolver getResolver(@NonNull LayoutManager layoutManager) {
+            if (layoutManager instanceof LinearLayoutManager) {
+                return new LayoutManagerResolver() {
+                    @Override
+                    public int findLastVisibleItemPosition(@NonNull LayoutManager layoutManager) {
+                        return ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
+                    }
+                };
+            } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+                return new LayoutManagerResolver() {
+                    @Override
+                    public int findLastVisibleItemPosition(@NonNull LayoutManager layoutManager) {
+                        int[] lastVisibleItemPositions =
+                                ((StaggeredGridLayoutManager) layoutManager)
+                                        .findLastVisibleItemPositions(null);
+                        int lastVisibleItemPosition = lastVisibleItemPositions[0];
+                        for (int i = 1; i < lastVisibleItemPositions.length; ++i) {
+                            if (lastVisibleItemPosition < lastVisibleItemPositions[i]) {
+                                lastVisibleItemPosition = lastVisibleItemPositions[i];
+                            }
+                        }
+                        return lastVisibleItemPosition;
+                    }
+                };
+            } else {
+                throw new IllegalArgumentException("unsupported layout manager: " + layoutManager);
+            }
+        }
+
+        public int findLastVisibleItemPosition() {
+            return resolver.findLastVisibleItemPosition(layoutManager);
+        }
+
+        private interface LayoutManagerResolver {
+            int findLastVisibleItemPosition(@NonNull LayoutManager layoutManager);
+        }
+    }
+
     private final class EndlessScrollListener extends OnScrollListener {
 
         private final Pager pager;
@@ -193,8 +239,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            int lastVisibleItemPosition = getLayoutManager()
-                    .findLastVisibleItemPosition();
+            int lastVisibleItemPosition = layoutManagerWrapper.findLastVisibleItemPosition();
             int lastItemPosition = getAdapter().getItemCount();
 
             if (pager.shouldLoad() && lastItemPosition - lastVisibleItemPosition <= threshold) {
