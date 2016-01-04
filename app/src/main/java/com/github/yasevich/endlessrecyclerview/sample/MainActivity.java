@@ -19,9 +19,13 @@ package com.github.yasevich.endlessrecyclerview.sample;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -53,6 +57,28 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         list.setAdapter(adapter);
         list.setPager(this);
 
+        findViewById(android.R.id.button1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateLayoutManager(new LinearLayoutManager(v.getContext()));
+            }
+        });
+
+        findViewById(android.R.id.button2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateLayoutManager(new GridLayoutManager(v.getContext(), 3));
+            }
+        });
+
+        findViewById(android.R.id.button3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateLayoutManager(new StaggeredGridLayoutManager(
+                        3, StaggeredGridLayoutManager.VERTICAL));
+            }
+        });
+
         addItems();
     }
 
@@ -74,6 +100,12 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         }, DELAY);
     }
 
+    private void updateLayoutManager(@NonNull RecyclerView.LayoutManager layoutManager) {
+        list.setLayoutManager(layoutManager);
+        adapter.setCount(0);
+        addItems();
+    }
+
     private void addItems() {
         adapter.setCount(adapter.getItemCount() + ITEMS_ON_PAGE);
     }
@@ -89,7 +121,7 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.text.setText("Item: " + (position + 1));
+            holder.text.setText(String.format("Item: %1$s", position + 1));
         }
 
         @Override
