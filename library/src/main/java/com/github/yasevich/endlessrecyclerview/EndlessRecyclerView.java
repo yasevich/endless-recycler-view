@@ -28,10 +28,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * {@code EndlessRecyclerView} lets you to load new pages when a user scrolls down to the bottom of
- * a list. If no {@link Pager} provided {@code EndlessRecyclerView} behaves as {@link RecyclerView}.
+ * {@code EndlessRecyclerView} lets you load new pages when a user scrolls down to the bottom of a
+ * list. If no {@link Pager} provided {@code EndlessRecyclerView} behaves as {@link RecyclerView}.
  * <p>
- * {@code EndlessRecyclerView} supports only {@link LinearLayoutManager} and its subclasses.
+ * {@code EndlessRecyclerView} supports {@link LinearLayoutManager} and its subclasses and
+ * {@link StaggeredGridLayoutManager} and its subclasses.
  * <p>
  * Implement {@link Pager} interface to determine when {@code EndlessRecyclerView} should start
  * loading process and a way to perform async operation. Use {@link #setPager(Pager)} method to set
@@ -53,7 +54,7 @@ import android.view.ViewGroup;
  * {@link #setOnScrollListener(OnScrollListener)} will cause {@link UnsupportedOperationException}.
  * <p>
  * If you use {@link RecyclerView.Adapter} with stable ids and want to show progress view, you
- * should keep in mind that view holder of progress view will have {@code NO_ID}.
+ * should keep in mind that view holder of progress view will have {@link #NO_ID}.
  *
  * @author Slava Yasevich
  */
