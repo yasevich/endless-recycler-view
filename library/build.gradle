@@ -3,7 +3,7 @@ apply plugin: 'bintray-release'
 
 ext {
     versionMajor = 1
-    versionMinor = 0
+    versionMinor = 1
     versionPatch = 0
 }
 
@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.2.0'
 }
 
 publish {

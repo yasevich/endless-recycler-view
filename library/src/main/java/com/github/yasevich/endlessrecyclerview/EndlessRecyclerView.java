@@ -17,6 +17,7 @@
 package com.github.yasevich.endlessrecyclerview;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -59,6 +60,14 @@ import android.view.ViewGroup;
  * @author Slava Yasevich
  */
 public final class EndlessRecyclerView extends RecyclerView {
+
+    private final Handler handler = new Handler();
+    private final Runnable notifyDataSetChangedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            adapterWrapper.notifyDataSetChanged();
+        }
+    };
 
     private EndlessScrollListener endlessScrollListener;
     private LayoutManagerWrapper layoutManagerWrapper;
@@ -170,7 +179,15 @@ public final class EndlessRecyclerView extends RecyclerView {
             return;
         }
         this.refreshing = refreshing;
-        this.adapterWrapper.notifyDataSetChanged();
+        notifyDataSetChanged();
+    }
+
+    private void notifyDataSetChanged() {
+        if (isComputingLayout()) {
+            handler.post(notifyDataSetChangedRunnable);
+        } else {
+            adapterWrapper.notifyDataSetChanged();
+        }
     }
 
     private static final class LayoutManagerWrapper {
