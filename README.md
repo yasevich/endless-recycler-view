@@ -21,7 +21,7 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.github.yasevich:endless-recycler-view:1.0'
+    compile 'com.github.yasevich:endless-recycler-view:1.1.0'
 }
 ```
 
