@@ -182,6 +182,13 @@ public final class EndlessRecyclerView extends RecyclerView {
         notifyDataSetChanged();
     }
 
+    /**
+     * @return {@code true} if progress view is shown
+     */
+    public boolean isRefreshing() {
+        return refreshing;
+    }
+
     private void notifyDataSetChanged() {
         if (isComputingLayout()) {
             handler.post(notifyDataSetChangedRunnable);
