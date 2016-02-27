@@ -101,17 +101,6 @@ public final class EndlessRecyclerView extends RecyclerView {
     }
 
     /**
-     * Use {@link #addOnScrollListener(OnScrollListener)} and
-     * {@link #removeOnScrollListener(OnScrollListener)} methods instead. Calling this method will
-     * cause {@link UnsupportedOperationException}.
-     */
-    @Override
-    public void setOnScrollListener(OnScrollListener listener) {
-        throw new UnsupportedOperationException("use addOnScrollListener(OnScrollListener) and " +
-                "removeOnScrollListener(OnScrollListener) instead");
-    }
-
-    /**
      * @param layout instances of {@link LinearLayoutManager} only
      */
     @Override
