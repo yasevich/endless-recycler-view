@@ -164,7 +164,7 @@ public final class EndlessRecyclerView extends RecyclerView {
      * @param refreshing {@code true} if list is currently refreshing, {@code false} otherwise
      */
     public void setRefreshing(boolean refreshing) {
-        if (this.refreshing == refreshing) {
+        if (this.refreshing == refreshing || isComputingLayout()) {
             return;
         }
         this.refreshing = refreshing;
