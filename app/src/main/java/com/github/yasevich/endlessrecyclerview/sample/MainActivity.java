@@ -67,7 +67,18 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         findViewById(android.R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateLayoutManager(new GridLayoutManager(v.getContext(), 3));
+                final GridLayoutManager manager = new GridLayoutManager(v.getContext(), 3);
+
+                // we want progress view to fill entire row
+                manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                    @Override
+                    public int getSpanSize(int position) {
+                        return list.isRefreshing() && position == manager.getItemCount() ?
+                                manager.getSpanCount() : 1;
+                    }
+                });
+
+                updateLayoutManager(manager);
             }
         });
 
