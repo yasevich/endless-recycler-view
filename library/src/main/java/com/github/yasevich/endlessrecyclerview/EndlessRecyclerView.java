@@ -168,7 +168,12 @@ public final class EndlessRecyclerView extends RecyclerView {
             return;
         }
         this.refreshing = refreshing;
-        notifyDataSetChanged();
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                notifyDataSetChanged();
+            }
+        });
     }
 
     /**
