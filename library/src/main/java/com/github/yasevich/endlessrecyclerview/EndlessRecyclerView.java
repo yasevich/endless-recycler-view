@@ -62,10 +62,24 @@ import android.view.ViewGroup;
 public final class EndlessRecyclerView extends RecyclerView {
 
     private final Handler handler = new Handler();
-    private final Runnable notifyDataSetChangedRunnable = new Runnable() {
+    private final Runnable notifyItemRangeInsertedRunnable = new Runnable() {
         @Override
         public void run() {
-            adapterWrapper.notifyDataSetChanged();
+            if (!clearView) {
+                if (progressView != null) {
+                    adapterWrapper.notifyItemRemoved(insertFrom);
+                }
+                adapterWrapper.notifyItemRangeInserted(insertFrom, adapterWrapper.getItemCount() - insertFrom);
+                insertFrom = 0;
+            }
+        }
+    };
+
+    private final Runnable notifyProgressViewInsertedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!clearView)
+                adapterWrapper.notifyItemInserted(insertFrom);
         }
     };
 
@@ -73,8 +87,11 @@ public final class EndlessRecyclerView extends RecyclerView {
     private LayoutManagerWrapper layoutManagerWrapper;
     private AdapterWrapper adapterWrapper;
     private View progressView;
+    private int progressViewRes = -1;
     private boolean refreshing;
     private int threshold = 1;
+    private int insertFrom = 0;
+    private boolean clearView = false;
 
     public EndlessRecyclerView(Context context) {
         this(context, null);
@@ -88,10 +105,19 @@ public final class EndlessRecyclerView extends RecyclerView {
         super(context, attrs, defStyle);
     }
 
+    /**
+     * Sets clear view flag which will prevent recycler from crash caused by data inconsistency when you change data during scroll
+     * e.g. backspace in nested lists
+     * @param clearView set true if you clear already displayed data
+     */
+    public void setClearView(boolean clearView) {
+        this.clearView = clearView;
+    }
+
     @Override
     public void setAdapter(Adapter adapter) {
         //noinspection unchecked
-        adapterWrapper = new AdapterWrapper(adapter);
+        adapterWrapper = new EndlessRecyclerView.AdapterWrapper(adapter);
         super.setAdapter(adapterWrapper);
     }
 
@@ -105,7 +131,7 @@ public final class EndlessRecyclerView extends RecyclerView {
      */
     @Override
     public void setLayoutManager(@Nullable LayoutManager layout) {
-        layoutManagerWrapper = layout == null ? null : new LayoutManagerWrapper(layout);
+        layoutManagerWrapper = layout == null ? null : new EndlessRecyclerView.LayoutManagerWrapper(layout);
         super.setLayoutManager(layout);
     }
 
@@ -114,12 +140,13 @@ public final class EndlessRecyclerView extends RecyclerView {
      *
      * @param pager pager to set or {@code null} to clear current pager
      */
-    public void setPager(Pager pager) {
+    public void setPager(EndlessRecyclerView.Pager pager) {
         if (pager != null) {
-            endlessScrollListener = new EndlessScrollListener(pager);
+            endlessScrollListener = new EndlessRecyclerView.EndlessScrollListener(pager);
             endlessScrollListener.setThreshold(threshold);
             addOnScrollListener(endlessScrollListener);
-        } else if (endlessScrollListener != null) {
+        }
+        else if (endlessScrollListener != null) {
             removeOnScrollListener(endlessScrollListener);
             endlessScrollListener = null;
         }
@@ -144,18 +171,7 @@ public final class EndlessRecyclerView extends RecyclerView {
      * @param layoutResId layout resource ID
      */
     public void setProgressView(int layoutResId) {
-        setProgressView(LayoutInflater
-                .from(getContext())
-                .inflate(layoutResId, this, false));
-    }
-
-    /**
-     * Sets progress view to show on the bottom of the list when loading starts.
-     *
-     * @param view the view
-     */
-    public void setProgressView(View view) {
-        progressView = view;
+        progressViewRes = layoutResId;
     }
 
     /**
@@ -168,7 +184,11 @@ public final class EndlessRecyclerView extends RecyclerView {
             return;
         }
         this.refreshing = refreshing;
-        notifyDataSetChanged();
+        if (!refreshing)
+            notifyDataSetChanged();
+        else
+            showProgressView();
+
     }
 
     /**
@@ -180,9 +200,16 @@ public final class EndlessRecyclerView extends RecyclerView {
 
     private void notifyDataSetChanged() {
         if (isComputingLayout()) {
-            handler.post(notifyDataSetChangedRunnable);
-        } else {
-            adapterWrapper.notifyDataSetChanged();
+            handler.post(notifyItemRangeInsertedRunnable);
+        }
+        else {
+            notifyItemRangeInsertedRunnable.run();
+        }
+    }
+
+    private void showProgressView() {
+        if (progressViewRes != -1) {
+            handler.post(notifyProgressViewInsertedRunnable);
         }
     }
 
@@ -192,7 +219,7 @@ public final class EndlessRecyclerView extends RecyclerView {
         final LayoutManager layoutManager;
 
         @NonNull
-        private final LayoutManagerResolver resolver;
+        private final EndlessRecyclerView.LayoutManagerWrapper.LayoutManagerResolver resolver;
 
         public LayoutManagerWrapper(@NonNull LayoutManager layoutManager) {
             this.layoutManager = layoutManager;
@@ -200,16 +227,17 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         @NonNull
-        private static LayoutManagerResolver getResolver(@NonNull LayoutManager layoutManager) {
+        private static EndlessRecyclerView.LayoutManagerWrapper.LayoutManagerResolver getResolver(@NonNull LayoutManager layoutManager) {
             if (layoutManager instanceof LinearLayoutManager) {
-                return new LayoutManagerResolver() {
+                return new EndlessRecyclerView.LayoutManagerWrapper.LayoutManagerResolver() {
                     @Override
                     public int findLastVisibleItemPosition(@NonNull LayoutManager layoutManager) {
                         return ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
                     }
                 };
-            } else if (layoutManager instanceof StaggeredGridLayoutManager) {
-                return new LayoutManagerResolver() {
+            }
+            else if (layoutManager instanceof StaggeredGridLayoutManager) {
+                return new EndlessRecyclerView.LayoutManagerWrapper.LayoutManagerResolver() {
                     @Override
                     public int findLastVisibleItemPosition(@NonNull LayoutManager layoutManager) {
                         int[] lastVisibleItemPositions =
@@ -224,7 +252,8 @@ public final class EndlessRecyclerView extends RecyclerView {
                         return lastVisibleItemPosition;
                     }
                 };
-            } else {
+            }
+            else {
                 throw new IllegalArgumentException("unsupported layout manager: " + layoutManager);
             }
         }
@@ -240,11 +269,11 @@ public final class EndlessRecyclerView extends RecyclerView {
 
     private final class EndlessScrollListener extends OnScrollListener {
 
-        private final Pager pager;
+        private final EndlessRecyclerView.Pager pager;
 
         private int threshold = 1;
 
-        public EndlessScrollListener(Pager pager) {
+        public EndlessScrollListener(EndlessRecyclerView.Pager pager) {
             if (pager == null) {
                 throw new NullPointerException("pager is null");
             }
@@ -257,6 +286,7 @@ public final class EndlessRecyclerView extends RecyclerView {
             int lastItemPosition = getAdapter().getItemCount();
 
             if (pager.shouldLoad() && lastItemPosition - lastVisibleItemPosition <= threshold) {
+                insertFrom = lastItemPosition;
                 setRefreshing(true);
                 pager.loadNextPage();
             }
@@ -276,7 +306,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         private final Adapter<ViewHolder> adapter;
 
-        private ProgressViewHolder progressViewHolder;
+        private EndlessRecyclerView.AdapterWrapper.ProgressViewHolder progressViewHolder;
 
         public AdapterWrapper(Adapter<ViewHolder> adapter) {
             if (adapter == null) {
@@ -298,7 +328,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public int getItemViewType(int position) {
-            return refreshing & position == adapter.getItemCount() ? PROGRESS_VIEW_TYPE :
+            return refreshing && position == adapter.getItemCount() ? PROGRESS_VIEW_TYPE :
                     adapter.getItemViewType(position);
         }
 
@@ -317,7 +347,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return viewType == PROGRESS_VIEW_TYPE ? progressViewHolder = new ProgressViewHolder() :
+            return viewType == PROGRESS_VIEW_TYPE ? progressViewHolder = new EndlessRecyclerView.AdapterWrapper.ProgressViewHolder(parent) :
                     adapter.onCreateViewHolder(parent, viewType);
         }
 
@@ -373,10 +403,17 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         private final class ProgressViewHolder extends ViewHolder {
-            public ProgressViewHolder() {
-                super(progressView);
+            ProgressViewHolder(ViewGroup parent) {
+                super(progressView = LayoutInflater
+                        .from(parent.getContext())
+                        .inflate(progressViewRes, parent, false));
             }
         }
+    }
+
+    public void clearRunnables() {
+        handler.removeCallbacks(notifyProgressViewInsertedRunnable);
+        handler.removeCallbacks(notifyItemRangeInsertedRunnable);
     }
 
     /**
