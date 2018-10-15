@@ -1,15 +1,30 @@
+/*
+ * Copyright 2018 Slava Yasevich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 apply plugin: 'com.android.library'
 apply plugin: 'bintray-release'
 
 ext {
-    versionMajor = 1
-    versionMinor = 1
+    versionMajor = 2
+    versionMinor = 0
     versionPatch = 0
 }
 
 android {
     compileSdkVersion rootProject.ext.targetSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -20,14 +35,15 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:recyclerview-v7:23.3.0'
+    api 'androidx.recyclerview:recyclerview:1.0.0'
 }
 
 publish {
     userOrg = 'slava'
     groupId = 'com.github.yasevich'
     artifactId = 'endless-recycler-view'
-    version = libVersionName()
+    publishVersion = libVersionName()
+    desc = 'Endless RecyclerView'
     website = 'https://github.com/yasevich/endless-recycler-view'
     issueTracker = "${website}/issues"
     repository = "${website}.git"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Slava Yasevich
+ * Copyright 2018 Slava Yasevich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,18 @@ package com.github.yasevich.endlessrecyclerview.sample;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.github.yasevich.endlessrecyclerview.EndlessRecyclerView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 /**
  * @author Slava Yasevich
@@ -51,7 +52,7 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        list = (EndlessRecyclerView) findViewById(android.R.id.list);
+        list = findViewById(android.R.id.list);
         list.setLayoutManager(new LinearLayoutManager(this));
         list.setProgressView(R.layout.item_progress);
         list.setAdapter(adapter);
@@ -126,7 +127,7 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         private int count;
 
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
         }
 
@@ -140,7 +141,7 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
             return count;
         }
 
-        public void setCount(int count) {
+        void setCount(int count) {
             this.count = count;
             notifyDataSetChanged();
         }
@@ -150,9 +151,9 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
 
         public final TextView text;
 
-        public ViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        ViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(android.R.layout.simple_list_item_1, parent, false));
-            text = (TextView) itemView.findViewById(android.R.id.text1);
+            text = itemView.findViewById(android.R.id.text1);
         }
     }
 }

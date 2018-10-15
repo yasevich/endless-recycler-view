@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright 2015 Slava Yasevich
+  ~ Copyright 2018 Slava Yasevich
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -30,11 +30,13 @@
         android:layout_weight="1"/>
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@android:id/button1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -43,6 +45,7 @@
             tools:ignore="HardcodedText" />
 
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@android:id/button2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -51,6 +54,7 @@
             tools:ignore="HardcodedText"/>
 
         <Button
+            style="?android:attr/buttonBarButtonStyle"
             android:id="@android:id/button3"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

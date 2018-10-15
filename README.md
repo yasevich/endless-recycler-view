@@ -5,7 +5,7 @@
 `EndlessRecyclerView` lets you to load new pages when a user scrolls down to the bottom of a list.
 It extends `RecyclerView` and it is fully configurable to meet different development needs.
 
-The library compatible with Android 7+.
+The library compatible with Android 14+.
 
 ## Usage
 
@@ -21,14 +21,13 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.github.yasevich:endless-recycler-view:1.1.0'
+    compile 'com.github.yasevich:endless-recycler-view:2.0.0'
 }
 ```
 
 Or include it to your lib folder.
 
-[![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)]
-(https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
+[![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
 
 ### Layout
 

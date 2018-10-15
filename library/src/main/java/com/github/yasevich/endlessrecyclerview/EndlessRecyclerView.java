@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Slava Yasevich
+ * Copyright 2018 Slava Yasevich
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ package com.github.yasevich.endlessrecyclerview;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 /**
  * {@code EndlessRecyclerView} lets you load new pages when a user scrolls down to the bottom of a
@@ -194,7 +195,7 @@ public final class EndlessRecyclerView extends RecyclerView {
         @NonNull
         private final LayoutManagerResolver resolver;
 
-        public LayoutManagerWrapper(@NonNull LayoutManager layoutManager) {
+        LayoutManagerWrapper(@NonNull LayoutManager layoutManager) {
             this.layoutManager = layoutManager;
             this.resolver = getResolver(layoutManager);
         }
@@ -229,7 +230,7 @@ public final class EndlessRecyclerView extends RecyclerView {
             }
         }
 
-        public int findLastVisibleItemPosition() {
+        int findLastVisibleItemPosition() {
             return resolver.findLastVisibleItemPosition(layoutManager);
         }
 
@@ -244,7 +245,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         private int threshold = 1;
 
-        public EndlessScrollListener(Pager pager) {
+        EndlessScrollListener(Pager pager) {
             if (pager == null) {
                 throw new NullPointerException("pager is null");
             }
@@ -252,9 +253,12 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            int lastVisibleItemPosition = layoutManagerWrapper.findLastVisibleItemPosition();
-            int lastItemPosition = getAdapter().getItemCount();
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            final Adapter adapter = getAdapter();
+            if (adapter == null) return;
+
+            final int lastVisibleItemPosition = layoutManagerWrapper.findLastVisibleItemPosition();
+            final int lastItemPosition = adapter.getItemCount();
 
             if (pager.shouldLoad() && lastItemPosition - lastVisibleItemPosition <= threshold) {
                 setRefreshing(true);
@@ -262,7 +266,7 @@ public final class EndlessRecyclerView extends RecyclerView {
             }
         }
 
-        public void setThreshold(int threshold) {
+        void setThreshold(int threshold) {
             if (threshold <= 0) {
                 throw new IllegalArgumentException("illegal threshold: " + threshold);
             }
@@ -278,7 +282,7 @@ public final class EndlessRecyclerView extends RecyclerView {
 
         private ProgressViewHolder progressViewHolder;
 
-        public AdapterWrapper(Adapter<ViewHolder> adapter) {
+        AdapterWrapper(Adapter<ViewHolder> adapter) {
             if (adapter == null) {
                 throw new NullPointerException("adapter is null");
             }
@@ -303,37 +307,38 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         @Override
-        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
             super.onAttachedToRecyclerView(recyclerView);
             adapter.onAttachedToRecyclerView(recyclerView);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             if (position < adapter.getItemCount()) {
                 adapter.onBindViewHolder(holder, position);
             }
         }
 
+        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             return viewType == PROGRESS_VIEW_TYPE ? progressViewHolder = new ProgressViewHolder() :
                     adapter.onCreateViewHolder(parent, viewType);
         }
 
         @Override
-        public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
             super.onDetachedFromRecyclerView(recyclerView);
             adapter.onDetachedFromRecyclerView(recyclerView);
         }
 
         @Override
-        public boolean onFailedToRecycleView(ViewHolder holder) {
+        public boolean onFailedToRecycleView(@NonNull ViewHolder holder) {
             return holder == progressViewHolder || adapter.onFailedToRecycleView(holder);
         }
 
         @Override
-        public void onViewAttachedToWindow(ViewHolder holder) {
+        public void onViewAttachedToWindow(@NonNull ViewHolder holder) {
             if (holder == progressViewHolder) {
                 return;
             }
@@ -341,7 +346,7 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         @Override
-        public void onViewDetachedFromWindow(ViewHolder holder) {
+        public void onViewDetachedFromWindow(@NonNull ViewHolder holder) {
             if (holder == progressViewHolder) {
                 return;
             }
@@ -349,7 +354,7 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         @Override
-        public void onViewRecycled(ViewHolder holder) {
+        public void onViewRecycled(@NonNull ViewHolder holder) {
             if (holder == progressViewHolder) {
                 return;
             }
@@ -357,23 +362,23 @@ public final class EndlessRecyclerView extends RecyclerView {
         }
 
         @Override
-        public void registerAdapterDataObserver(AdapterDataObserver observer) {
+        public void registerAdapterDataObserver(@NonNull AdapterDataObserver observer) {
             super.registerAdapterDataObserver(observer);
             adapter.registerAdapterDataObserver(observer);
         }
 
         @Override
-        public void unregisterAdapterDataObserver(AdapterDataObserver observer) {
+        public void unregisterAdapterDataObserver(@NonNull AdapterDataObserver observer) {
             super.unregisterAdapterDataObserver(observer);
             adapter.unregisterAdapterDataObserver(observer);
         }
 
-        public Adapter<ViewHolder> getAdapter() {
+        Adapter<ViewHolder> getAdapter() {
             return adapter;
         }
 
         private final class ProgressViewHolder extends ViewHolder {
-            public ProgressViewHolder() {
+            ProgressViewHolder() {
                 super(progressView);
             }
         }
