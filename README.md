@@ -21,7 +21,7 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.github.yasevich:endless-recycler-view:2.0.0'
+    implementation 'com.github.yasevich:endless-recycler-view:2.0.0'
 }
 ```
 
@@ -36,8 +36,6 @@ You can include `EndlessRecyclerView` to your layout as following:
 ```xml
 <com.github.yasevich.endlessrecyclerview.EndlessRecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/list"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>
 ```
