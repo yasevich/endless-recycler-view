@@ -15,6 +15,9 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'org.sonarqube'
+
+apply from: '../version.gradle'
 
 android {
     compileSdkVersion rootProject.ext.targetSdkVersion
@@ -23,12 +26,19 @@ android {
         applicationId "com.github.yasevich.endlessrecyclerview.sample"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode libVersionCode()
+        versionName libVersionName()
     }
 }
 
 dependencies {
     implementation 'com.github.yasevich:endless-recycler-view:2.0.0'
     // implementation project(':library')
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'endless-recycler-view'
+        property 'sonar.projectVersion', libVersionName()
+    }
 }

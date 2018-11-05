@@ -17,11 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'bintray-release'
 
-ext {
-    versionMajor = 2
-    versionMinor = 0
-    versionPatch = 0
-}
+apply from: '../version.gradle'
 
 android {
     compileSdkVersion rootProject.ext.targetSdkVersion
@@ -47,12 +43,4 @@ publish {
     website = 'https://github.com/yasevich/endless-recycler-view'
     issueTracker = "${website}/issues"
     repository = "${website}.git"
-}
-
-def libVersionCode() {
-    return versionMajor * 10000 + versionMinor * 100 + versionPatch
-}
-
-def libVersionName() {
-    return "${versionMajor}.${versionMinor}.${versionPatch}"
 }

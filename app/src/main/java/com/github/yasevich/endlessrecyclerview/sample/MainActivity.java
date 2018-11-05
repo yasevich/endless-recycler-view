@@ -41,7 +41,7 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
     private static final int TOTAL_PAGES = 10;
     private static final long DELAY = 1000L;
 
-    private final Adapter adapter = new Adapter();
+    private final AdapterImpl adapter = new AdapterImpl();
     private final Handler handler = new Handler();
 
     private EndlessRecyclerView list;
@@ -122,17 +122,17 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         adapter.setCount(adapter.getItemCount() + ITEMS_ON_PAGE);
     }
 
-    private static final class Adapter extends RecyclerView.Adapter<ViewHolder> {
+    private static final class AdapterImpl extends RecyclerView.Adapter<ViewHolderImpl> {
 
         private int count;
 
         @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
+        public ViewHolderImpl onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new ViewHolderImpl(LayoutInflater.from(parent.getContext()), parent);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(ViewHolderImpl holder, int position) {
             holder.text.setText(String.format("Item: %1$s", position + 1));
         }
 
@@ -147,11 +147,11 @@ public final class MainActivity extends Activity implements EndlessRecyclerView.
         }
     }
 
-    private static final class ViewHolder extends RecyclerView.ViewHolder {
+    private static final class ViewHolderImpl extends RecyclerView.ViewHolder {
 
         public final TextView text;
 
-        ViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        ViewHolderImpl(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(android.R.layout.simple_list_item_1, parent, false));
             text = itemView.findViewById(android.R.id.text1);
         }

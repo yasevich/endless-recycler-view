@@ -1,0 +1,13 @@
+ext.libVersionCode = {
+    return Version.major * 10000 + Version.minor * 100 + Version.patch
+}
+
+ext.libVersionName = {
+    return "${Version.major}.${Version.minor}.${Version.patch}"
+}
+
+class Version {
+    static def major = 2
+    static def minor = 0
+    static def patch = 0
+}
