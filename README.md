@@ -11,7 +11,7 @@ The library compatible with Android 14+.
 
 ### Dependencies
 
-To use the library in your project write this code to your build.gradle:
+To use the library in your project add this code to your build.gradle:
 
 ```groovy
 buildscript {
@@ -25,9 +25,7 @@ dependencies {
 }
 ```
 
-Or include it to your lib folder.
-
-[![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
+Or copy it to your `lib` folder: [![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
 
 ### Layout
 
@@ -46,7 +44,6 @@ Set up `EndlessRecyclerView` parameters as required:
 
 ```java
 EndlessRecyclerView list = ...; // initialization
-list.setLayoutManager(new LinearLayoutManager(this));
 list.setProgressView(R.layout.item_progress);
 list.setAdapter(adapter);
 list.setPager(this);
@@ -54,10 +51,10 @@ list.setPager(this);
 
 ### Also
 
-When page is loaded you may want to stop showing progress view:
+When a page is loaded you may want to stop showing progress view:
 
 ```java
 list.setRefreshing(false);
 ```
 
-See sample and documentation for more details.
+See sample and JavaDoc for more details.
