@@ -1,5 +1,7 @@
 # endless-recycler-view
 
+[![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
+
 ## Overview
 
 `EndlessRecyclerView` lets you to load new pages when a user scrolls down to the bottom of a list.
@@ -25,7 +27,7 @@ dependencies {
 }
 ```
 
-Or copy it to your `lib` folder: [![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
+Or copy it to your `lib` folder: [download](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion).
 
 ### Layout
 
