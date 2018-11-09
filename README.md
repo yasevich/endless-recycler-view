@@ -1,6 +1,6 @@
 # endless-recycler-view
 
-[![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion)
+[![Download](https://api.bintray.com/packages/slava/maven/endless-recycler-view/images/download.svg)](https://bintray.com/slava/maven/endless-recycler-view/_latestVersion) ![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=yasevich_endless-recycler-view&metric=alert_status)
 
 ## Overview
 
