@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.application'
+apply plugin: 'org.sonarqube'
 
 apply from: '../version.gradle'
 
-android {
-    compileSdkVersion rootProject.ext.targetSdkVersion
-
-    defaultConfig {
-        applicationId "com.github.yasevich.endlessrecyclerview.sample"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode libVersionCode()
-        versionName libVersionName()
+sonarqube {
+    properties {
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.organization', 'yasevich-github'
+        property 'sonar.projectKey', 'yasevich_endless-recycler-view'
+        property 'sonar.projectName', 'endless-recycler-view'
+        property 'sonar.projectVersion', libVersionName()
     }
-}
-
-dependencies {
-    implementation 'com.github.yasevich:endless-recycler-view:2.0.0'
-    // implementation project(':library')
 }

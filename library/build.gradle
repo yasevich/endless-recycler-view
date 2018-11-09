@@ -17,6 +17,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'bintray-release'
 
+apply from: '../sonar.gradle'
 apply from: '../version.gradle'
 
 android {
